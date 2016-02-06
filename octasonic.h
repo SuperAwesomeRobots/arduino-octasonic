@@ -10,6 +10,7 @@ public:
   unsigned int get(unsigned int index);
 
 private:
+  void init(unsigned int num_sensors, unsigned int chipSelect);
   unsigned int send(unsigned int n);
   unsigned int chipSelect;
 

@@ -1,11 +1,16 @@
 #include <Arduino.h>
+#include <SPI.h>
 #include "octasonic.h"
 
 Octasonic::Octasonic(unsigned int num_sensors) {
-  this(num_sensors, 10);
+  init(num_sensors, 10);
 }
 
 Octasonic::Octasonic(unsigned int num_sensors, unsigned int _chipSelect) {
+  init(num_sensors, _chipSelect);
+}
+
+void Octasonic::init(unsigned int num_sensors, unsigned int _chipSelect) {
 
   this->chipSelect = _chipSelect;
 
@@ -17,9 +22,10 @@ Octasonic::Octasonic(unsigned int num_sensors, unsigned int _chipSelect) {
   SPI.begin();
 
   // set sensor count
-  send(0x10 | count);
+  send(0x10 | num_sensors);
 
 }
+
 
 unsigned int Octasonic::get(unsigned int index) {
   //Serial.println("get_sensor_reading()");
