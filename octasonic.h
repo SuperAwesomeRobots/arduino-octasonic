@@ -10,6 +10,7 @@ public:
   unsigned int get(unsigned int index);
 
 private:
+  unsigned int send(unsigned int n);
   unsigned int chipSelect;
 
 };

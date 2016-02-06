@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "octasonic.h"
 
 Octasonic::Octasonic(unsigned int num_sensors) {
@@ -29,7 +30,7 @@ unsigned int Octasonic::get(unsigned int index) {
   return ret;
 }
 
-unsigned int Octasonic::send(unsigned int) {
+unsigned int Octasonic::send(unsigned int n) {
 //  Serial.print("Sending ");
 //  Serial.print(n, HEX);
   digitalWrite(chipSelect, LOW);
