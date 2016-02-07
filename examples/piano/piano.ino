@@ -38,6 +38,5 @@ void loop() {
     noTone(speakerPin); 
   } else {
     tone(speakerPin, notes[note]);
-    delay(100);
   }
 }
