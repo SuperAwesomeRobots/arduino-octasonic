@@ -7,7 +7,7 @@ Arduino library and firmware for Octasonic breakout board.
 Connect the Octasonic pins to Arduino Uno pins as follows
 
 ```
-Octasonic Arduino
+Octasonic Arduino Uno
 5V        5V
 SCK       Digital 13
 MISO      Digital 12
