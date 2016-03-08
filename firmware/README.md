@@ -4,9 +4,9 @@
 
 The current protocol is very simple and uses single byte requests and responses. The first four bits of each request indicate the command, as follows:
 
-0001 - Set number of sensors (last four bits specify number of sensors)
-0002 - Query number of sensors
-0003 - Get latest reading for a sensor (last four bits specify sensor index)
+- 0001 - Set number of sensors (last four bits specify number of sensors)
+- 0002 - Query number of sensors
+- 0003 - Get latest reading for a sensor (last four bits specify sensor index)
 
 ## Planned enhancements
 
