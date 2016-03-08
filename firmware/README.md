@@ -14,6 +14,8 @@ I plan on making the following improvements soon:
 
 - Add command to set max distance to read (currently hard-coded as 100cm)
 - Use two bytes for sensor readings, allowing for distances > 255 cm
+- Make the polling interval configurable
+- Make the polling order configurable
 
 
 
