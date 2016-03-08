@@ -1,5 +1,16 @@
 # Octasonic Breakout Firmware
 
+## Instructions
+
+To upload new firmware to the board you will need an [AVR Pocket Programmer](https://www.sparkfun.com/products/9825).
+
+From the command-line, type the following:
+
+```
+cd avr-slave-interrupt
+make flash
+```
+
 ## Protocol
 
 The current protocol is very simple and uses single byte requests and responses. The first four bits of each request indicate the command, as follows:
