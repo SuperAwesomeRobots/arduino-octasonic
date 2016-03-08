@@ -19,7 +19,7 @@ The current protocol is very simple and uses single byte requests and responses.
 - 0002 - Query number of sensors
 - 0003 - Get latest reading for a sensor (last four bits specify sensor index)
 
-## Planned enhancements
+## Planned Enhancements
 
 I plan on making the following improvements soon:
 
