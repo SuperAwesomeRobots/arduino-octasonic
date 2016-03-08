@@ -93,6 +93,7 @@ unsigned int poll_sensor(unsigned int i) {
     count = count + 1;
     _delay_us(1);
 
+    // stop measuring after 5800 us (100 cm)
     if (count > 5800) {
       break;
     }
@@ -106,7 +107,7 @@ int main(void)
 {
 
   for (int i=0; i<MAX_SENSOR_COUNT; i++) {
-    sensor_data[i] = 7;
+    sensor_data[i] = 0;
   }
 
   spi_init_slave();                             //Initialize slave SPI
