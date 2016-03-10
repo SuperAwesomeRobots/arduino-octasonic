@@ -44,6 +44,11 @@ ISR(SPI_STC_vect) {
   unsigned int index = 0;
 
   switch (command) {
+    case 0:
+      // after the master sends a valid command, it receives the response on the next 
+      // call and sends a zero request for that call
+      SPDR = 0x00;
+      break;
     case 1: 
       // set_sensor_count to the value specified in the last 4 bits
       sensor_count = data_in & 0x0F;
@@ -64,7 +69,6 @@ ISR(SPI_STC_vect) {
         SPDR = sensor_data[index];
       }
       break;
-
     case 4:
       // set interval between activating each sensor
       sleep_between_readings = data_in & 0x0F;
