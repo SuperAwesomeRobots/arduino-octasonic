@@ -14,6 +14,10 @@ unsigned int sensor_count = MAX_SENSOR_COUNT;
 
 volatile unsigned int sensor_data[MAX_SENSOR_COUNT];
 
+// how long to sleep between taking readins, in multiples of 10 ms, so default is 5 x 10ms = 50 ms
+volatile unsigned int sleep_between_readings = 5;
+
+
 void spi_init_slave (void)
 {
   SPI_SCK_DDR   &= ~(1 << SPI_SCK);                      /* input on SCK */
@@ -40,26 +44,35 @@ ISR(SPI_STC_vect) {
   unsigned int index = 0;
 
   switch (command) {
-    case 0:
-      SPDR = 0x00;
-      break;
-    case 1: // set_sensor_count
+    case 1: 
+      // set_sensor_count to the value specified in the last 4 bits
       sensor_count = data_in & 0x0F;
+      // return the value 0 in response
       SPDR = 0x00;
       break;
-    case 2: // get_sensor_count
+    case 2: 
+      // get_sensor_count - no parameters, return the current sensor count in response
       SPDR = sensor_count;
       break;
     case 3:
+      // get_sensor_reading - last 4 bits indicates sensor number 0 through 7
       index = data_in & 0x0F;
       if (index<0 || index>=MAX_SENSOR_COUNT) {
+        // return error code of 0xFF (255) if the sensor number is not valid
         SPDR = 0xFF;
       } else {
         SPDR = sensor_data[index];
       }
       break;
+
+    case 4:
+      // set interval between activating each sensor
+      sleep_between_readings = data_in & 0x0F;
+      SPDR = 0x00;
+      break;
+
     default:
-      // 0xFF means error condition
+      // unsupported command so return 0xFF to indicate error condition
       SPDR = 0xFF;
       break;
   }
@@ -93,8 +106,10 @@ unsigned int poll_sensor(unsigned int i) {
     count = count + 1;
     _delay_us(1);
 
-    // stop measuring after 5800 us (100 cm)
-    if (count > 5800) {
+    // stop measuring after some timeout value
+    //  5,800 = 100 cm 
+    // 14,500 = 250 cm
+    if (count > 14500) {
       break;
     }
 
@@ -106,22 +121,32 @@ unsigned int poll_sensor(unsigned int i) {
 int main(void)
 {
 
+  // init all sensors readings to zero
   for (int i=0; i<MAX_SENSOR_COUNT; i++) {
     sensor_data[i] = 0;
   }
 
-  spi_init_slave();                             //Initialize slave SPI
+  // initialize slave SPI
+  spi_init_slave();                             
   sei();
+
+  // loop forever, taking readings, and sleeping between each reading
   while(1) {
     for (int i=0; i<MAX_SENSOR_COUNT; i++) {
       sensor_data[i] = poll_sensor(i);
-      _delay_ms(40);
+
+      // sleep for between 0 and 150 ms (intervals of 10 ms)
+      for (int i=0; i<sleep_between_readings; i++) {
+        _delay_ms(10);
+      }
     }
-  /*
-  PORTB ^= (1 << PB0);
-  _delay_ms(500);
-  PORTB ^= (1 << PB0);
-  _delay_ms(500);
-  */
+
+    // debug code for blinking LEDs    
+    /*
+    PORTB ^= (1 << PB0);
+    _delay_ms(500);
+    PORTB ^= (1 << PB0);
+    _delay_ms(500);
+    */
   }
 }
