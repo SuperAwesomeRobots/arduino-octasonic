@@ -2,16 +2,14 @@
 #include <SPI.h>
 #include "octasonic.h"
 
-Octasonic::Octasonic(unsigned int num_sensors) {
-  init(num_sensors, 10);
-}
+#define CMD_GET_PROTOCOL_VERSION 0x01
+#define CMD_SET_SENSOR_COUNT     0x02
+#define CMD_GET_SENSOR_COUNT     0x03
+#define CMD_GET_SENSOR_READING   0x04
+#define CMD_SET_INTERVAL         0x05
+#define CMD_TOGGLE_LED           0x06
 
-Octasonic::Octasonic(unsigned int num_sensors, unsigned int _chipSelect) {
-  init(num_sensors, _chipSelect);
-}
-
-void Octasonic::init(unsigned int num_sensors, unsigned int _chipSelect) {
-
+Octasonic::Octasonic(unsigned int _chipSelect) {
   this->chipSelect = _chipSelect;
 
   pinMode(chipSelect, OUTPUT);
@@ -20,31 +18,52 @@ void Octasonic::init(unsigned int num_sensors, unsigned int _chipSelect) {
   // init SPI
   SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
   SPI.begin();
-
-  // set sensor count
-  send(0x10 | num_sensors);
-
 }
 
+unsigned int Octasonic::get_protocol_version() {
+  return sendThenReceive(CMD_GET_PROTOCOL_VERSION << 4);
+}
 
+unsigned int Octasonic::set_sensor_count(unsigned int sensor_count) {
+  return sendThenReceive(CMD_SET_SENSOR_COUNT << 4 | sensor_count);
+}
+
+unsigned int Octasonic::get_sensor_count() {
+  return sendThenReceive(CMD_GET_SENSOR_COUNT << 4);
+}
+
+void Octasonic::toggle_led() {
+  send(CMD_TOGGLE_LED << 4);
+}
+
+/*
 unsigned int Octasonic::get(unsigned int index) {
-  //Serial.println("get_sensor_reading()");
-  send(0x30 | index);
-  unsigned int ret = send(0x00);
-  //Serial.print("get_sensor_reading() returning ");
-  //Serial.println(ret);
-  return ret;
+  return sendThenReceive(CMD_GET_SENSOR_READING << 4 | index);
+}
+*/
+
+/* set the interval between polling sensors in intervals of 10 ms up to a maximum of 15 x 10 ms */
+/*void Octasonic::set_poll_interval(unsigned int n) {
+  send(CMD_SET_INTERVAL << 4 | n);
+}
+*/
+
+
+unsigned int Octasonic::sendThenReceive(unsigned int n) {
+  return send(n);
+  //return send(0x00);
 }
 
 unsigned int Octasonic::send(unsigned int n) {
-//  Serial.print("Sending ");
-//  Serial.print(n, HEX);
+  Serial.print("Octasonic::send() sends ");
+  Serial.println(n, HEX);
   digitalWrite(chipSelect, LOW);
   unsigned int response = SPI.transfer(n);
   digitalWrite(chipSelect, HIGH);
-//  Serial.print(" .. received ");
-//  Serial.println(response, HEX);
+  Serial.print("Octasonic::send() returns ");
+  Serial.println(response, HEX);
   return response;
 }
+
 
 

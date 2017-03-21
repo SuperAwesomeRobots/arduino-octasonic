@@ -2,6 +2,15 @@
 
 Arduino library and firmware for Octasonic breakout board.
 
+## Flash the firmware to the Octasonic board
+
+You will need an AVR programmer.
+
+```
+make fuses
+make flash
+```
+
 ## Connecting the board
 
 Connect the Octasonic pins to Arduino Uno pins as follows
