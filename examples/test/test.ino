@@ -1,35 +1,45 @@
 #include <SPI.h>
 #include "octasonic.h"
+#include "notes.h"
 
-const int sensorCount = 1;
+int notes[] = {
+  NOTE_A3, 
+  NOTE_B3, 
+  NOTE_C4,
+  NOTE_D4,
+  NOTE_E4,
+  NOTE_F4,
+  NOTE_G4,
+  NOTE_A4
+};
+
 const int chipSelectPin = 10;
+const int speakerPin = 9;
+const int sensorCount = 8;
 
 Octasonic octasonic(chipSelectPin);
 
 void setup() {
   Serial.begin(9600);
-  
-  Serial.print("Protocol version: ");
-  Serial.println(octasonic.get_protocol_version());
 
   octasonic.set_sensor_count(sensorCount);
-  
-  Serial.print("Sensor count: ");
-  Serial.println(octasonic.get_sensor_count());
 }
 
 void loop() {
   
+  // determine the first sensor that had a distance less than 20
+  int note = -1;
   for (int i=0; i<sensorCount; i++) {
     int j = octasonic.get_sensor_reading(i);
-
-    // print number with leading spaces if required
-    if (j<100) Serial.print(" ");
-    if (j<10) Serial.print(" ");
-    Serial.print(j);
-
-    Serial.print("  ");
+    if (j < 20) {
+      note = i;
+      break;
+    }
   }
-  Serial.println();
-  delay(1000);
+  // play the selected note
+  if (note == -1) {
+    noTone(speakerPin); 
+  } else {
+    tone(speakerPin, notes[note]);
+  }
 }
