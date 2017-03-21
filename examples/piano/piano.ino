@@ -16,7 +16,7 @@ int notes[] = {
 const int chipSelectPin = 10;
 const int speakerPin = 9;
 
-Octasonic octasonic(8, chipSelectPin);
+Octasonic octasonic(1, chipSelectPin);
 
 void setup() {
   Serial.begin(9600);

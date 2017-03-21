@@ -9,6 +9,15 @@
 #include "pinDefines.h"
 #include "macros.h"
 
+#define PROTOCOL_VERSION 0x01
+
+#define CMD_GET_PROTOCOL_VERSION 0x01
+#define CMD_SET_SENSOR_COUNT     0x02
+#define CMD_GET_SENSOR_COUNT     0x03
+#define CMD_GET_SENSOR_READING   0x04
+#define CMD_SET_INTERVAL         0x05
+#define CMD_TOGGLE_LED           0x06
+
 #define MAX_SENSOR_COUNT 8
 unsigned int sensor_count = MAX_SENSOR_COUNT;
 
@@ -20,11 +29,11 @@ volatile unsigned int sleep_between_readings = 5;
 
 void spi_init_slave (void)
 {
-  SPI_SCK_DDR   &= ~(1 << SPI_SCK);                      /* input on SCK */
-  SPI_SS_DDR    &= ~(1 << SPI_SS);                        /* set SS input */
-  SPI_MOSI_DDR  &= ~(1 << SPI_MOSI);                   /* input on MOSI */
+  SPI_SCK_DDR   &= ~(1 << SPI_SCK);                  /* input on SCK */
+  SPI_SS_DDR    &= ~(1 << SPI_SS);                   /* input on SS */
+  SPI_MOSI_DDR  &= ~(1 << SPI_MOSI);                 /* input on MOSI */
+  SPI_MISO_DDR  |= (1 << SPI_MISO);                  /* output on MISO */
 
-  SPI_MISO_DDR  |= (1 << SPI_MISO);                   /* output on MISO */
   SPI_MOSI_PORT |= (1 << SPI_MOSI);                  /* pullup on MOSI */
 
   // enable SPI and SPI interrupt
@@ -44,22 +53,31 @@ ISR(SPI_STC_vect) {
   unsigned int index = 0;
 
   switch (command) {
-    case 0:
+
+    case 0x00:
       // after the master sends a valid command, it receives the response on the next 
       // call and sends a zero request for that call
       SPDR = 0x00;
       break;
-    case 1: 
+
+    case CMD_GET_PROTOCOL_VERSION:
+      // get protocol version
+      SPDR = PROTOCOL_VERSION;
+      break;
+
+    case CMD_SET_SENSOR_COUNT: 
       // set_sensor_count to the value specified in the last 4 bits
       sensor_count = data_in & 0x0F;
       // return the value 0 in response
       SPDR = 0x00;
       break;
-    case 2: 
+
+    case CMD_GET_SENSOR_COUNT: 
       // get_sensor_count - no parameters, return the current sensor count in response
       SPDR = sensor_count;
       break;
-    case 3:
+
+    case CMD_GET_SENSOR_READING:
       // get_sensor_reading - last 4 bits indicates sensor number 0 through 7
       index = data_in & 0x0F;
       if (index<0 || index>=MAX_SENSOR_COUNT) {
@@ -69,10 +87,16 @@ ISR(SPI_STC_vect) {
         SPDR = sensor_data[index];
       }
       break;
-    case 4:
+
+    case CMD_SET_INTERVAL:
       // set interval between activating each sensor
       sleep_between_readings = data_in & 0x0F;
       SPDR = 0x00;
+      break;
+
+    case CMD_TOGGLE_LED:
+      // toggle LED
+      PORTB ^= (1 << PB0);
       break;
 
     default:
@@ -81,8 +105,6 @@ ISR(SPI_STC_vect) {
       break;
   }
 
-  // toggle LED
-  PORTB ^= (1 << PB0);
 
 }
 
@@ -144,13 +166,5 @@ int main(void)
         _delay_ms(10);
       }
     }
-
-    // debug code for blinking LEDs    
-    /*
-    PORTB ^= (1 << PB0);
-    _delay_ms(500);
-    PORTB ^= (1 << PB0);
-    _delay_ms(500);
-    */
   }
 }
