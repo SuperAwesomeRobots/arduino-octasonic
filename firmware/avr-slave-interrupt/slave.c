@@ -29,11 +29,15 @@ volatile unsigned int sleep_between_readings = 5;
 
 void spi_init_slave (void)
 {
+  // inputs
   SPI_SCK_DDR   &= ~(1 << SPI_SCK);                  /* input on SCK */
   SPI_SS_DDR    &= ~(1 << SPI_SS);                   /* input on SS */
   SPI_MOSI_DDR  &= ~(1 << SPI_MOSI);                 /* input on MOSI */
+
+  // outputs
   SPI_MISO_DDR  |= (1 << SPI_MISO);                  /* output on MISO */
 
+  // set pullup on MOSI
   SPI_MOSI_PORT |= (1 << SPI_MOSI);                  /* pullup on MOSI */
 
   // enable SPI and SPI interrupt
@@ -105,7 +109,6 @@ ISR(SPI_STC_vect) {
       break;
   }
 
-
 }
 
 unsigned int poll_sensor(unsigned int i) {
@@ -146,15 +149,22 @@ unsigned int poll_sensor(unsigned int i) {
 
 int main(void)
 {
+  // initialize slave SPI
+  spi_init_slave();                             
+  sei();
 
+  // blink LED to show that the slave is alive
+  while (1) {
+    PORTB ^= (1 << PB0);
+    _delay_ms(100);
+  }
+
+/*
   // init all sensors readings to zero
   for (int i=0; i<MAX_SENSOR_COUNT; i++) {
     sensor_data[i] = 0;
   }
 
-  // initialize slave SPI
-  spi_init_slave();                             
-  sei();
 
   // loop forever, taking readings, and sleeping between each reading
   while(1) {
@@ -167,4 +177,5 @@ int main(void)
       }
     }
   }
+  */
 }

@@ -50,8 +50,8 @@ unsigned int Octasonic::get(unsigned int index) {
 
 
 unsigned int Octasonic::sendThenReceive(unsigned int n) {
-  send(n);
-  return send(0x00);
+  return send(n);
+  //return send(0x00);
 }
 
 unsigned int Octasonic::send(unsigned int n) {
