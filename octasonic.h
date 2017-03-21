@@ -23,7 +23,7 @@ public:
   //void set_poll_interval(unsigned int n);
 
   /* get the latest reading for a particular sensor */
-  //unsigned int get(unsigned int index);
+  unsigned int get_sensor_reading(unsigned int index);
 
 private:
   //void init(unsigned int num_sensors, unsigned int _chipSelect);

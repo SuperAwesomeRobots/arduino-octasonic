@@ -16,10 +16,12 @@ int notes[] = {
 const int chipSelectPin = 10;
 const int speakerPin = 9;
 
-Octasonic octasonic(1, chipSelectPin);
+Octasonic octasonic(chipSelectPin);
 
 void setup() {
   Serial.begin(9600);
+
+  octasonic.set_sensor_count(8);
 }
 
 void loop() {
@@ -27,7 +29,7 @@ void loop() {
   // determine the first sensor that had a distance less than 20
   int note = -1;
   for (int i=0; i<8; i++) {
-    int j = octasonic.get(i);
+    int j = octasonic.get_sensor_reading(i);
     if (j < 20) {
       note = i;
       break;

@@ -4,10 +4,12 @@
 const int sensorCount = 1;
 const int chipSelectPin = 10;
 
-Octasonic octasonic(sensorCount, chipSelectPin);
+Octasonic octasonic(chipSelectPin);
 
 void setup() {
   Serial.begin(9600);
+  
+  octasonic.set_sensor_count(sensorCount);
 }
 
 void loop() {

@@ -36,11 +36,9 @@ void Octasonic::toggle_led() {
   send(CMD_TOGGLE_LED << 4);
 }
 
-/*
-unsigned int Octasonic::get(unsigned int index) {
+unsigned int Octasonic::get_sensor_reading(unsigned int index) {
   return sendThenReceive(CMD_GET_SENSOR_READING << 4 | index);
 }
-*/
 
 /* set the interval between polling sensors in intervals of 10 ms up to a maximum of 15 x 10 ms */
 /*void Octasonic::set_poll_interval(unsigned int n) {
