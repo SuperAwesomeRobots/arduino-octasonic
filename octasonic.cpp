@@ -48,18 +48,18 @@ unsigned int Octasonic::get_sensor_reading(unsigned int index) {
 
 
 unsigned int Octasonic::sendThenReceive(unsigned int n) {
-  return send(n);
-  //return send(0x00);
+  send(n);
+  return send(0x00);
 }
 
 unsigned int Octasonic::send(unsigned int n) {
-  Serial.print("Octasonic::send() sends ");
-  Serial.println(n, HEX);
+  // Serial.print("Octasonic::send() sends ");
+  // Serial.println(n, HEX);
   digitalWrite(chipSelect, LOW);
   unsigned int response = SPI.transfer(n);
   digitalWrite(chipSelect, HIGH);
-  Serial.print("Octasonic::send() returns ");
-  Serial.println(response, HEX);
+  // Serial.print("Octasonic::send() returns ");
+  // Serial.println(response, HEX);
   return response;
 }
 
