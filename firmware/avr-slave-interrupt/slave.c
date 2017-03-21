@@ -149,26 +149,24 @@ unsigned int poll_sensor(unsigned int i) {
 
 int main(void)
 {
-  // initialize slave SPI
-  spi_init_slave();                             
-  sei();
-
-  // blink LED to show that the slave is alive
-  while (1) {
-    PORTB ^= (1 << PB0);
-    _delay_ms(100);
-  }
-
-/*
   // init all sensors readings to zero
   for (int i=0; i<MAX_SENSOR_COUNT; i++) {
     sensor_data[i] = 0;
   }
 
+  // initialize slave SPI
+  spi_init_slave();                             
+  sei();
+
 
   // loop forever, taking readings, and sleeping between each reading
   while(1) {
-    for (int i=0; i<MAX_SENSOR_COUNT; i++) {
+
+    // blink LED to show that the slave is alive
+    // PORTB ^= (1 << PB0);
+    // _delay_ms(100);
+
+    for (int i=0; i<sensor_count; i++) {
       sensor_data[i] = poll_sensor(i);
 
       // sleep for between 0 and 150 ms (intervals of 10 ms)
@@ -177,5 +175,5 @@ int main(void)
       }
     }
   }
-  */
+
 }
