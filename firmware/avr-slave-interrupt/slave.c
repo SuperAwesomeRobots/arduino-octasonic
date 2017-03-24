@@ -19,13 +19,17 @@
 #define CMD_TOGGLE_LED           0x06
 
 #define MAX_SENSOR_COUNT 8
+#define MAX_DISTANCE_CM 250
+#define MAX_ECHO_TIME_US MAX_DISTANCE_CM*58
+
+// default to the maximum sensor count but this can be overridden
 unsigned int sensor_count = MAX_SENSOR_COUNT;
 
+// storage area for latest reading from each sensor
 volatile unsigned int sensor_data[MAX_SENSOR_COUNT];
 
-// how long to sleep between taking readins, in multiples of 10 ms, so default is 5 x 10ms = 50 ms
+// how long to sleep between taking readings, in multiples of 10 ms, so default is 5 x 10ms = 50 ms
 volatile unsigned int sleep_between_readings = 5;
-
 
 void spi_init_slave (void)
 {
@@ -48,6 +52,12 @@ void spi_init_slave (void)
   DDRB |= (1 << PB0); // PB0 = output (LED)
 }
 
+/** 
+ * This function is called AFTER an SPI transfer is complete. The incoming byte is 
+ * stored in SPDR. A new value can be stored in SPDR to be returned to the master
+ * device on the next SPI transfer. The entire protocol is currently based on single 
+ * byte request/response pairs.
+ */
 ISR(SPI_STC_vect) {
 
   unsigned int data_in = SPDR;
@@ -112,7 +122,8 @@ ISR(SPI_STC_vect) {
 }
 
 unsigned int poll_sensor(unsigned int i) {
-  // trigger
+
+  // set "trigger" pin high for 10 microseconds
   DDRD |= (1 << i);
   PORTD |= (1 << i);
   _delay_us(10);
@@ -121,7 +132,7 @@ unsigned int poll_sensor(unsigned int i) {
   // set pin to input
   DDRD &= ~(1 << i);
 
-  // loop while echo is LOW
+  // loop while echo is LOW (we expect it to go high almost immediately)
   unsigned int count = 0;
   do {
     if (++count > 1000) {
@@ -129,20 +140,10 @@ unsigned int poll_sensor(unsigned int i) {
     }
   } while (!(PIND & (1 << i)));
 
-  // loop while echo is HIGH
-  count = 0;
-  do {
-    count = count + 1;
+  // loop while echo is HIGH and count the microseconds
+  for (count=0; count<MAX_ECHO_TIME_US && PIND & (1 << i); count++) {
     _delay_us(1);
-
-    // stop measuring after some timeout value
-    //  5,800 = 100 cm 
-    // 14,500 = 250 cm
-    if (count > 14500) {
-      break;
-    }
-
-  } while (PIND & (1 << i));
+  }
 
   return count / 58;
 }
@@ -158,14 +159,8 @@ int main(void)
   spi_init_slave();                             
   sei();
 
-
   // loop forever, taking readings, and sleeping between each reading
   while(1) {
-
-    // blink LED to show that the slave is alive
-    // PORTB ^= (1 << PB0);
-    // _delay_ms(100);
-
     for (int i=0; i<sensor_count; i++) {
       sensor_data[i] = poll_sensor(i);
 
