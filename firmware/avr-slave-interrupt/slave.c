@@ -17,10 +17,14 @@
 #define CMD_GET_SENSOR_READING   0x04
 #define CMD_SET_INTERVAL         0x05
 #define CMD_TOGGLE_LED           0x06
+#define CMD_SET_MAX_DISTANCE     0x07
+#define CMD_GET_MAX_DISTANCE     0x08
 
 #define MAX_SENSOR_COUNT 8
-#define MAX_DISTANCE_CM 250
-#define MAX_ECHO_TIME_US MAX_DISTANCE_CM*58
+#define MAX_ECHO_TIME_US max_distance * 58
+
+// maximum distance to measure
+unsigned int max_distance = 255;
 
 // default to the maximum sensor count but this can be overridden
 unsigned int sensor_count = MAX_SENSOR_COUNT;
@@ -103,7 +107,7 @@ ISR(SPI_STC_vect) {
       break;
 
     case CMD_SET_INTERVAL:
-      // set interval between activating each sensor
+      // set interval between activating each sensor (in multiples of 10ms)
       sleep_between_readings = data_in & 0x0F;
       SPDR = 0x00;
       break;
@@ -111,6 +115,19 @@ ISR(SPI_STC_vect) {
     case CMD_TOGGLE_LED:
       // toggle LED
       PORTB ^= (1 << PB0);
+      break;
+
+    case CMD_SET_MAX_DISTANCE:
+      // set max distance to measure in multiples of 16 cm to make it fit with the single byte protocol
+      // 0x00 = 16cm
+      // 0x01 = 32cm
+      // ...
+      // 0x0F = 256cm
+      max_distance = 16 * ((data_in & 0x0F) + 1);
+      break;
+
+    case CMD_GET_MAX_DISTANCE:  
+      SPDR = ((max_distance / 16) - 1) & 0x0F;
       break;
 
     default:
