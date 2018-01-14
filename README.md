@@ -1,17 +1,6 @@
-# arduino-octasonic
+# Arduino Library for the Octasonic HC-SR04 Breakout Board
 
-Arduino library and firmware for Octasonic breakout board.
-
-## Flash the firmware to the Octasonic board
-
-Connect the octasonic board to your computer using an AVR programmer.
-
-```
-cd firmware/avr-slave-interrupt
-make clean
-make fuses
-make flash
-```
+This is an arduino library for the Octasonic HC-SR04 breakout board that allow you to connect up to 8 HC-SR04 sensors to an Arduino with just a few wires.
 
 ## Connecting the board to an Arduino Uno
 
